@@ -1,6 +1,7 @@
 from __future__ import annotations
 import datetime
 from dataclasses import dataclass
+import time
 
 import httpx
 
@@ -36,8 +37,8 @@ class PriceData:
 class EwsApi:
     """Main API class"""
     _session: httpx.AsyncClient
-    _data: list[PriceData]
-    _meta: MetaData | None
+    data: list[PriceData]
+    meta: MetaData | None
 
     @classmethod
     async def authenticate(cls, api_key: str) -> bool:
@@ -53,15 +54,12 @@ class EwsApi:
         self._session = httpx.AsyncClient()
         self._session.headers.update({"User-Agent": build_user_agent()})
         self._session.headers.update({"X-API-KEY": api_key})
-        self._data = []
-        self._meta = None
+        self.data = []
+        self.meta = None
     
     async def get(self) -> list[PriceData]:
         await self.fetch()
-        return self._data
-
-    async def get_raw_data(self) -> list[PriceData]:
-        return list(self._data)
+        return self.data
     
     async def fetch(self) -> bool:
         """Fetch data from the EWS API."""
@@ -70,7 +68,7 @@ class EwsApi:
             return False
         json_data: dict = r.json()
         
-        self._meta = MetaData(
+        self.meta = MetaData(
             interval=json_data["interval"],
             interval_unit=json_data["intervalUnit"],
             unit=json_data["priceUnit"],
@@ -78,5 +76,5 @@ class EwsApi:
         )
         
         price_items = json_data.get("today", []) + json_data.get("tomorrow", [])
-        self._data = [PriceData.from_json(item) for item in price_items]
+        self.data = [PriceData.from_json(item) for item in price_items]
         return True
