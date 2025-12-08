@@ -22,3 +22,55 @@ dev = [
     "pytest>=9.0.2",
     "ruff>=0.14.8",
 ]
+
+[tool.ruff]
+target-version = "py313"
+preview = true
+
+[tool.ruff.format]
+skip-magic-trailing-comma = true
+
+[tool.ruff.lint]
+select = [
+    "A",
+    "B",
+    "BLE",
+    "C4",
+    "C90",
+    "COM",
+    "E",
+    "F",
+    "I",
+    "LOG",
+    "N",
+    "PTH",
+    "Q",
+    "RUF",
+    "S",
+    "TRY",
+    "W",
+]
+ignore = [
+    # Since we're using the ruff formatter, we follow ruff's official guide on what
+    # rules to skip: https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
+    "W191",
+    "E111",
+    "E114",
+    "E117",
+    "D206",
+    "D300",
+    "Q000",
+    "Q001",
+    "Q002",
+    "Q003",
+    "COM812",
+    "COM819",
+]
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.lint.isort]
+# For consistency with the formatter, see https://docs.astral.sh/ruff/settings/#lint_isort_split-on-trailing-comma 
+split-on-trailing-comma = false

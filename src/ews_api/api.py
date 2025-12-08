@@ -1,7 +1,7 @@
 from __future__ import annotations
+
 import datetime
 from dataclasses import dataclass
-import time
 
 import httpx
 
@@ -36,6 +36,7 @@ class PriceData:
 
 class EwsApi:
     """Main API class"""
+
     _session: httpx.AsyncClient
     data: list[PriceData]
     meta: MetaData | None
@@ -44,11 +45,15 @@ class EwsApi:
     async def authenticate(cls, api_key: str) -> bool:
         """Authenticate with the EWS API using the provided API key."""
         try:
-            r = httpx.get(EWS_DATA_URI, headers={"X-API-KEY": api_key})
-            return r.is_success
+            r = httpx.get(
+                EWS_DATA_URI,
+                headers={"User-Agent": build_user_agent(), "X-API-KEY": api_key},
+            )
         except httpx.HTTPError:
             return False
-    
+        else:
+            return r.is_success
+
     def __init__(self, api_key: str) -> None:
         """Initialize the EWS API client."""
         self._session = httpx.AsyncClient()
@@ -56,25 +61,25 @@ class EwsApi:
         self._session.headers.update({"X-API-KEY": api_key})
         self.data = []
         self.meta = None
-    
+
     async def get(self) -> list[PriceData]:
         await self.fetch()
         return self.data
-    
+
     async def fetch(self) -> bool:
         """Fetch data from the EWS API."""
         r = await self._session.get(EWS_DATA_URI)
         if not r.is_success:
             return False
         json_data: dict = r.json()
-        
+
         self.meta = MetaData(
             interval=json_data["interval"],
             interval_unit=json_data["intervalUnit"],
             unit=json_data["priceUnit"],
             tariff=json_data["tariff"],
         )
-        
+
         price_items = json_data.get("today", []) + json_data.get("tomorrow", [])
         self.data = [PriceData.from_json(item) for item in price_items]
         return True
