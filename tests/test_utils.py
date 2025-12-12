@@ -3,8 +3,8 @@ import re
 
 import httpx
 
-from ews_api.const import PROJECT_NAME, PROJECT_URL
-from ews_api.utils import build_user_agent
+from ews_api._const import PROJECT_NAME, PROJECT_URL
+from ews_api._utils import build_user_agent
 
 
 def test_build_user_agent_defaults():

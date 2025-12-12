@@ -3,7 +3,8 @@ from __future__ import annotations
 import httpx
 
 import ews_api
-from ews_api.const import PROJECT_NAME, PROJECT_URL
+
+from ._const import PROJECT_NAME, PROJECT_URL
 
 
 def build_user_agent(version: str = ews_api.__version__) -> str:

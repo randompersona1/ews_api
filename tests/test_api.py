@@ -6,7 +6,7 @@ from typing import Any
 
 import httpx
 
-from ews_api.api import EwsApi, MetaData, PriceData
+from ews_api._api import EwsApi, MetaData, PriceData
 
 EXAMPLE_PATH = Path(__file__).parent / "examples" / "example.json"
 EXAMPLE_DATA: dict[str, Any] = json.loads(EXAMPLE_PATH.read_text())

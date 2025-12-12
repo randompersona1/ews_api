@@ -23,6 +23,11 @@ dev = [
     "ruff>=0.14.8",
 ]
 
+[tool.pytest.ini_options]
+addopts = "-ra -q"
+pythonpath = ["."]
+testpaths = ["tests"]
+
 [tool.ruff]
 target-version = "py313"
 preview = true
@@ -72,5 +77,5 @@ fixable = ["ALL"]
 unfixable = []
 
 [tool.ruff.lint.isort]
-# For consistency with the formatter, see https://docs.astral.sh/ruff/settings/#lint_isort_split-on-trailing-comma 
+# For consistency with the formatter, see https://docs.astral.sh/ruff/settings/#lint_isort_split-on-trailing-comma
 split-on-trailing-comma = false

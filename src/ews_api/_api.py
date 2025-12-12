@@ -5,8 +5,9 @@ from dataclasses import dataclass
 
 import httpx
 
-from ews_api.const import EWS_DATA_URI
-from ews_api.utils import build_user_agent
+from ._const import EWS_DATA_URI
+from ._logging import logger
+from ._utils import build_user_agent
 
 
 @dataclass
@@ -43,13 +44,14 @@ class EwsApi:
 
     @classmethod
     async def authenticate(cls, api_key: str) -> bool:
-        """Authenticate with the EWS API using the provided API key."""
+        """Check whether the provided EWS API key is valid."""
         try:
             r = httpx.get(
                 EWS_DATA_URI,
                 headers={"User-Agent": build_user_agent(), "X-API-KEY": api_key},
             )
         except httpx.HTTPError:
+            logger.error("Error creating authentication request")
             return False
         else:
             return r.is_success
@@ -62,9 +64,12 @@ class EwsApi:
         self.data = []
         self.meta = None
 
-    async def get(self) -> list[PriceData]:
-        await self.fetch()
-        return self.data
+    async def reauth(self, api_key: str) -> bool:
+        """Reauthenticate the session with a new API key."""
+        r = await EwsApi.authenticate(api_key)
+        if r:
+            self._session.headers.update({"X-API-KEY": api_key})
+        return r
 
     async def fetch(self) -> bool:
         """Fetch data from the EWS API."""
@@ -83,3 +88,38 @@ class EwsApi:
         price_items = json_data.get("today", []) + json_data.get("tomorrow", [])
         self.data = [PriceData.from_json(item) for item in price_items]
         return True
+
+
+def match_date(prices: list[PriceData], day: datetime.date) -> list[PriceData]:
+    """Filter prices to have only those from a given day"""
+    matches: list[PriceData] = []
+    for price in prices:
+        if price.starts_at.date() == day:
+            matches.append(price)
+    return matches
+
+
+def get_price_now(prices: list[PriceData], time: datetime.datetime) -> float | None:
+    """
+    Return the total price whose start time is the closest lower value to ``time``.
+    Function does not check that ``time`` is within any given timedelta of that start
+    time.
+    """
+    if len(prices) < 2:
+        return None
+
+    lower: PriceData | None = None
+    upper: datetime.datetime | None = None
+
+    for price in prices:
+        start = price.starts_at
+        if start < time:
+            if lower is None or start > lower.starts_at:
+                lower = price
+        elif start > time:
+            if upper is None or start < upper:
+                upper = start
+
+    if lower is None or upper is None:
+        return None
+    return lower.total_price
