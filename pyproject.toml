@@ -19,6 +19,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "coverage>=7.13.0",
     "pytest>=9.0.2",
     "ruff>=0.14.8",
 ]
@@ -72,5 +73,5 @@ fixable = ["ALL"]
 unfixable = []
 
 [tool.ruff.lint.isort]
-# For consistency with the formatter, see https://docs.astral.sh/ruff/settings/#lint_isort_split-on-trailing-comma 
+# For consistency with the formatter, see https://docs.astral.sh/ruff/settings/#lint_isort_split-on-trailing-comma
 split-on-trailing-comma = false

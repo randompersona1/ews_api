@@ -6,7 +6,7 @@ from importlib.metadata import PackageNotFoundError, version
 def _get_version() -> str:
     try:
         return version(__name__)
-    except PackageNotFoundError:
+    except PackageNotFoundError:  # pragma: no cover
         return "unknownversion"
 
 
